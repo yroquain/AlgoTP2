@@ -9,11 +9,20 @@ public class PlayerController : MonoBehaviour
     public GameObject TextaAffiche;
     public GameObject Pellet;
     public GameObject Pellet2;
+    public GameObject ArrowUp;
+    public GameObject ArrowDown;
+    public GameObject ArrowLeft;
+    public GameObject ArrowRight;
 
 
     //Text
     public Text textAffiche;
     public Text gold;
+    public Text textChoix;
+    public Text TextUp;
+    public Text TextLeft;
+    public Text TextRight;
+    public Text TextDown;
 
 
     //Bool
@@ -27,13 +36,38 @@ public class PlayerController : MonoBehaviour
 
     //Autre
     private Vector2 movement;
+    private string PersEnn;
     private float time;
     private string MyChoice;
+    private float TypePersonnage;
 
     // Use this for initialization
     void Start()
     {
-        OnlyOnce = true;
+        TypePersonnage = Random.Range(0F, 3.9F);
+        if (TypePersonnage < 1)
+        {
+            PersEnn = "Soldat";
+        }
+        else if (TypePersonnage<2)
+        {
+            PersEnn = "Paysan";
+            ArrowDown.SetActive(false);
+            TextUp.GetComponent<Text>().text = "Passer sans rien faire";
+        }
+        else if (TypePersonnage<3)
+        {
+            PersEnn = "Blessé";
+            ArrowLeft.SetActive(false);
+            TextUp.GetComponent<Text>().text = "Laisser agoniser";
+            TextDown.GetComponent<Text>().text = "Sauver";
+        }
+        else if (TypePersonnage<4)
+        {
+            PersEnn = "Voleur";
+        }
+        textChoix.GetComponent<Text>().text = "Vous vous trouvez devant un " + PersEnn + "\nQuel est votre choix?";
+         OnlyOnce = true;
         MyChoice = "";
         TextaAffiche.SetActive(false);
         AfficheText = false;
@@ -106,13 +140,16 @@ public class PlayerController : MonoBehaviour
             Tuer();
             AfficheCanvas = false;
         }
-        if (inputX < 0)
+        if (PersEnn != "Blessé")
         {
-            MyCanvas.SetActive(false);
-            MyChoice = "Blesser";
-            IsChosing = false;
-            Blesser();
-            AfficheCanvas = false;
+            if (inputX < 0)
+            {
+                MyCanvas.SetActive(false);
+                MyChoice = "Blesser";
+                IsChosing = false;
+                Blesser();
+                AfficheCanvas = false;
+            }
         }
         float inputY = Input.GetAxis("Vertical");
         if (inputY > 0)
@@ -123,13 +160,16 @@ public class PlayerController : MonoBehaviour
             EssayerdePasser();
             AfficheCanvas = false;
         }
-        if (inputY < 0)
+        if (PersEnn != "Paysan")
         {
-            MyCanvas.SetActive(false);
-            MyChoice = "Donnerdelor";
-            IsChosing = false;
-            Donnerdelor();
-            AfficheCanvas = false;
+            if (inputY < 0)
+            {
+                MyCanvas.SetActive(false);
+                MyChoice = "Donnerdelor";
+                IsChosing = false;
+                Donnerdelor();
+                AfficheCanvas = false;
+            }
         }
     }
 
