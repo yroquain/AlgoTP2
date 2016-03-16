@@ -46,6 +46,7 @@ public class PlayerController : MonoBehaviour
     private string MyChoice;
     private float TypePersonnage;
     private float TypeClan;
+    private string[] Clan;
 
     // Use this for initialization
     void Start()
@@ -88,6 +89,10 @@ public class PlayerController : MonoBehaviour
         {
             PersEnn = "Voleur";
         }
+        if(PlayerPrefs.GetFloat("Gold")<10 && PersEnn!="Blessé")
+        {
+            ArrowDown.SetActive(false);
+        }
         textChoix.GetComponent<Text>().text = "Vous vous trouvez devant un " + PersEnn + " " + ClanEnn + "\nQuel est votre choix?";
          OnlyOnce = true;
         MyChoice = "";
@@ -99,6 +104,14 @@ public class PlayerController : MonoBehaviour
         Once = false;
         Twice = false;
         InstantiateOnce = true;
+        Clan = new string[3];
+        Clan[0] = "Bleu";
+        Clan[1] = "Vert";
+        Clan[2] = "Rouge";
+        Debug.Log(PlayerPrefs.GetFloat("RespectRouge"));
+        Debug.Log(PlayerPrefs.GetFloat("RespectBleu"));
+        Debug.Log(PlayerPrefs.GetFloat("RespectVert"));
+        Debug.Log(PlayerPrefs.GetFloat("Gold"));
     }
 
     // Update is called once per frame
@@ -182,7 +195,7 @@ public class PlayerController : MonoBehaviour
             EssayerdePasser();
             AfficheCanvas = false;
         }
-        if (PersEnn != "Paysan")
+        if (PersEnn != "Paysan" && (PlayerPrefs.GetFloat("Gold")>=10 || PersEnn=="Blessé"))
         {
             if (inputY < 0)
             {
@@ -213,22 +226,22 @@ public class PlayerController : MonoBehaviour
             if (PersEnn == "Soldat")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 5);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+                Reputation(-8);
             }
             if (PersEnn == "Paysan")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 2);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+                Reputation(-8);
             }
             if (PersEnn == "Blessé")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 3);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+                Reputation(-5);
             }
             if (PersEnn == "Voleur")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 7);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+                Reputation(-8); 
             }
         }
     }
@@ -251,17 +264,17 @@ public class PlayerController : MonoBehaviour
 
                 if (PersEnn == "Paysan")
                 {
-                    PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") + 3);
+                    Reputation(+3);
                 }
                 if (PersEnn == "Blessé")
                 {
-                    PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+                    Reputation(-8);
                 }
                 if (PersEnn == "Voleur")
                 {
                     if (PlayerPrefs.GetFloat("Respect" + ClanEnn) < 40)
                     {
-                        PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 20);
+                        Reputation(-20);
                     }
                 }
             }
@@ -288,17 +301,17 @@ public class PlayerController : MonoBehaviour
             if (PersEnn == "Soldat")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 5);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+                Reputation(-5);
             }
             if (PersEnn == "Paysan")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 2);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+                Reputation(-5);
             }
             if (PersEnn == "Voleur")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 7);
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+                Reputation(-5);
             }
         }
     }
@@ -313,7 +326,7 @@ public class PlayerController : MonoBehaviour
             }
             if (PersEnn == "Blessé")
             {
-                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") + 15);
+                Reputation(15);
             }
             if (PersEnn == "Voleur")
             {
@@ -327,6 +340,20 @@ public class PlayerController : MonoBehaviour
         {
             AfficheText = true;
             MyChoice = "";
+        }
+    }
+    private void Reputation(float respect)
+    {
+        for(int i=0; i<3; i++)
+        {
+            if (Clan[i]==ClanEnn)
+            {
+                PlayerPrefs.SetFloat("Respect" + Clan[i], PlayerPrefs.GetFloat("Respect"+ Clan[i]) + respect);
+            }
+            else
+            {
+                PlayerPrefs.SetFloat("Respect" + Clan[i], PlayerPrefs.GetFloat("Respect"+ Clan[i]) + (respect/3));
+            }
         }
     }
 }
