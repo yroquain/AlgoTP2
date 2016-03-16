@@ -28,9 +28,14 @@ public class Menu1 : MonoBehaviour {
                 ContinuerButton.SetActive(false);
             }
         }
+        if (PlayerPrefs.GetFloat("Mort")==1)
+        {
+            ContinuerButton.SetActive(false);
+        }
     }
 	public void OnClickNewGame()
     {
+        PlayerPrefs.SetFloat("Mort", 0);
         float princesse = Random.Range(0, 2.9f);
         if (princesse < 1)
         {

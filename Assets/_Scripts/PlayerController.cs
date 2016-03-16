@@ -299,6 +299,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             AfficheCanvas = false;
+            PlayerPrefs.SetFloat("Mort", 1);
             textAffiche.GetComponent<Text>().text = "Le Soldat ne vous a pas laissé passer\nVous êtes morts";
             TextaAffiche.SetActive(true);
         }
