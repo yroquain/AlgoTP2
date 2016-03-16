@@ -14,6 +14,10 @@ public class PlayerController : MonoBehaviour
     public GameObject ArrowLeft;
     public GameObject ArrowRight;
 
+    //Sprites
+    public Sprite EnnB;
+    public Sprite EnnR;
+    public Sprite EnnV;
 
     //Text
     public Text textAffiche;
@@ -37,13 +41,31 @@ public class PlayerController : MonoBehaviour
     //Autre
     private Vector2 movement;
     private string PersEnn;
+    public string ClanEnn;
     private float time;
     private string MyChoice;
     private float TypePersonnage;
+    private float TypeClan;
 
     // Use this for initialization
     void Start()
     {
+        TypeClan = Random.Range(0F, 2.9F);
+        if (TypeClan < 1)
+        {
+            ClanEnn = "Bleu";
+            GameObject.FindWithTag("Ennemi").GetComponent<SpriteRenderer>().sprite = EnnB;
+        }
+        else if (TypeClan < 2)
+        {
+            ClanEnn = "Vert";
+            GameObject.FindWithTag("Ennemi").GetComponent<SpriteRenderer>().sprite = EnnV;
+        }
+        else if (TypeClan < 3)
+        {
+            ClanEnn = "Rouge";
+            GameObject.FindWithTag("Ennemi").GetComponent<SpriteRenderer>().sprite = EnnR;
+        }
         TypePersonnage = Random.Range(0F, 3.9F);
         if (TypePersonnage < 1)
         {
@@ -66,7 +88,7 @@ public class PlayerController : MonoBehaviour
         {
             PersEnn = "Voleur";
         }
-        textChoix.GetComponent<Text>().text = "Vous vous trouvez devant un " + PersEnn + "\nQuel est votre choix?";
+        textChoix.GetComponent<Text>().text = "Vous vous trouvez devant un " + PersEnn + " " + ClanEnn + "\nQuel est votre choix?";
          OnlyOnce = true;
         MyChoice = "";
         TextaAffiche.SetActive(false);
@@ -187,19 +209,66 @@ public class PlayerController : MonoBehaviour
         {
             Instantiate(Pellet, new Vector3(transform.position.x + 1, transform.position.y, 0), Quaternion.Euler(0, 0, 0));
             InstantiateOnce = false;
-            textAffiche.GetComponent<Text>().text = "Vous venez de tuer un joueur rouge\nLa haine de son clan à votre égard augmente";
+            textAffiche.GetComponent<Text>().text = "Vous venez de tuer un joueur " + ClanEnn+"\nLa haine de son clan à votre égard augmente";
+            if (PersEnn == "Soldat")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 5);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+            }
+            if (PersEnn == "Paysan")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 2);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+            }
+            if (PersEnn == "Blessé")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 3);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+            }
+            if (PersEnn == "Voleur")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 7);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+            }
         }
     }
     private void EssayerdePasser()
     {
-        movement = new Vector2(5, 0);
-        textAffiche.GetComponent<Text>().text = "Vous avez épargné joueur rouge\nSon clan saura s'en souvenir";
 
-        GetComponent<Rigidbody2D>().velocity = movement;
-        if (transform.position.x > 10)
+        if (PersEnn != "Soldat" || (PersEnn == "Soldat" && PlayerPrefs.GetFloat("Respect" + ClanEnn) > 50))
         {
-            AfficheText = true;
-            MyChoice = "";
+            movement = new Vector2(5, 0);
+            GetComponent<Rigidbody2D>().velocity = movement;
+            if (transform.position.x > 10)
+            {
+                AfficheText = true;
+                MyChoice = "";
+            }
+            if (InstantiateOnce)
+            {
+                InstantiateOnce = false;
+                textAffiche.GetComponent<Text>().text = "Vous avez épargné joueur " + ClanEnn + "\nSon clan saura s'en souvenir";
+
+                if (PersEnn == "Paysan")
+                {
+                    PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") + 3);
+                }
+                if (PersEnn == "Blessé")
+                {
+                    PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 8);
+                }
+                if (PersEnn == "Voleur")
+                {
+                    if (PlayerPrefs.GetFloat("Respect" + ClanEnn) < 40)
+                    {
+                        PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 20);
+                    }
+                }
+            }
+        }
+        else
+        {
+            //GameOver
         }
     }
     private void Blesser()
@@ -215,15 +284,41 @@ public class PlayerController : MonoBehaviour
         {
             Instantiate(Pellet2, new Vector3(transform.position.x + 1, transform.position.y, 0), Quaternion.Euler(0, 0, 0));
             InstantiateOnce = false;
-            textAffiche.GetComponent<Text>().text = "Vous venez de blesser un joueur rouge\nLa haine de son clan à votre égard augmente quelque peu";
+            textAffiche.GetComponent<Text>().text = "Vous venez de blesser un joueur " + ClanEnn + "\nLa haine de son clan à votre égard augmente quelque peu";
+            if (PersEnn == "Soldat")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 5);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+            }
+            if (PersEnn == "Paysan")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 2);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+            }
+            if (PersEnn == "Voleur")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 7);
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") - 5);
+            }
         }
     }
     private void Donnerdelor()
     {
-        textAffiche.GetComponent<Text>().text = "Vous venez de perdre 10gold";
         if (OnlyOnce)
         {
-            PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") - 10);
+            if (PersEnn == "Soldat")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") - 10);
+                textAffiche.GetComponent<Text>().text = "Vous venez de perdre 10gold";
+            }
+            if (PersEnn == "Blessé")
+            {
+                PlayerPrefs.SetFloat("Respect" + ClanEnn, PlayerPrefs.GetFloat("Respect") + 15);
+            }
+            if (PersEnn == "Voleur")
+            {
+                PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") - 10);
+            }
             OnlyOnce = false;
         }
         movement = new Vector2(5, 0);

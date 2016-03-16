@@ -4,7 +4,9 @@ using System.Collections;
 public class Pellet2 : MonoBehaviour {
 
     private float speed;
-    public Sprite blesse;
+    public Sprite blesseB;
+    public Sprite blesseR;
+    public Sprite blesseV;
 
     void Start()
     {
@@ -15,7 +17,18 @@ public class Pellet2 : MonoBehaviour {
     {
         if (col.gameObject.tag == "Ennemi")
         {
-            col.gameObject.GetComponent<SpriteRenderer>().sprite = blesse;
+            if (GameObject.FindWithTag("Player").GetComponent<PlayerController>().ClanEnn == "Rouge")
+            {
+                col.gameObject.GetComponent<SpriteRenderer>().sprite = blesseR;
+            }
+            if (GameObject.FindWithTag("Player").GetComponent<PlayerController>().ClanEnn == "Bleu")
+            {
+                col.gameObject.GetComponent<SpriteRenderer>().sprite = blesseB;
+            }
+            if (GameObject.FindWithTag("Player").GetComponent<PlayerController>().ClanEnn == "Vert")
+            {
+                col.gameObject.GetComponent<SpriteRenderer>().sprite = blesseV;
+            }
             Destroy(gameObject);
         }
     }
