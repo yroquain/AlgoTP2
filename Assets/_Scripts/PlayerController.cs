@@ -276,22 +276,26 @@ public class PlayerController : MonoBehaviour
             }
             if (InstantiateOnce)
             {
+                textAffiche.GetComponent<Text>().text = "Vous avez essayé de passer devant le Soldat " + ClanEnn + "\nSon clan vous apprécie suffisamment, il vous laisse la vie sauve";
                 InstantiateOnce = false;
-                textAffiche.GetComponent<Text>().text = "Vous avez épargné joueur " + ClanEnn + "\nSon clan saura s'en souvenir";
 
                 if (PersEnn == "Paysan")
                 {
+                    textAffiche.GetComponent<Text>().text = "Vous avez épargné le joueur " + ClanEnn + "\nSon clan saura s'en souvenir";
                     Reputation(+3);
                 }
                 if (PersEnn == "Blessé")
                 {
+                    textAffiche.GetComponent<Text>().text = "Vous avez laissé agoniser le joueur " + ClanEnn + "\nLa haine de son clan à votre égard augmente";
                     Reputation(-8);
                 }
                 if (PersEnn == "Voleur")
                 {
+                    textAffiche.GetComponent<Text>().text = "Vous êtes passés sans rien faire";
                     if (PlayerPrefs.GetFloat("Respect" + ClanEnn) < 40)
                     {
                         Reputation(-20);
+                        textAffiche.GetComponent<Text>().text = "Vous êtes passés devant un voleur sans rien faire\nLe Clan " + ClanEnn + " vous en veut terriblement";
                     }
                 }
             }
@@ -346,6 +350,7 @@ public class PlayerController : MonoBehaviour
             }
             if (PersEnn == "Blessé")
             {
+                textAffiche.GetComponent<Text>().text = "Vous venez de sauver un soldat du Clan " + ClanEnn +"\nSon Clan vous en est reconnaissant";
                 Reputation(15);
             }
             if (PersEnn == "Voleur")
