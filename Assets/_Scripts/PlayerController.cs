@@ -13,6 +13,9 @@ public class PlayerController : MonoBehaviour
     public GameObject ArrowDown;
     public GameObject ArrowLeft;
     public GameObject ArrowRight;
+    public GameObject Slider;
+    public GameObject SliderRef;
+    public GameObject RestartButton;
 
     //Sprites
     public Sprite EnnB;
@@ -38,15 +41,18 @@ public class PlayerController : MonoBehaviour
     private bool InstantiateOnce;
     private bool OnlyOnce;
 
-    //Autre
-    private Vector2 movement;
+    //Clan
     private string PersEnn;
     public string ClanEnn;
-    private float time;
-    private string MyChoice;
     private float TypePersonnage;
     private float TypeClan;
     private string[] Clan;
+
+    //Autre
+    private Vector2 movement;
+    private float time;
+    private string MyChoice;
+    private float respectPrincesse;
 
     // Use this for initialization
     void Start()
@@ -72,29 +78,30 @@ public class PlayerController : MonoBehaviour
         {
             PersEnn = "Soldat";
         }
-        else if (TypePersonnage<2)
+        else if (TypePersonnage < 2)
         {
             PersEnn = "Paysan";
             ArrowDown.SetActive(false);
             TextUp.GetComponent<Text>().text = "Passer sans rien faire";
         }
-        else if (TypePersonnage<3)
+        else if (TypePersonnage < 3)
         {
             PersEnn = "Blessé";
             ArrowLeft.SetActive(false);
             TextUp.GetComponent<Text>().text = "Laisser agoniser";
             TextDown.GetComponent<Text>().text = "Sauver";
         }
-        else if (TypePersonnage<4)
+        else if (TypePersonnage < 4)
         {
             PersEnn = "Voleur";
         }
-        if(PlayerPrefs.GetFloat("Gold")<10 && PersEnn!="Blessé")
+        if (PlayerPrefs.GetFloat("Gold") < 10 && PersEnn != "Blessé")
         {
             ArrowDown.SetActive(false);
         }
+        Princesse();
         textChoix.GetComponent<Text>().text = "Vous vous trouvez devant un " + PersEnn + " " + ClanEnn + "\nQuel est votre choix?";
-         OnlyOnce = true;
+        OnlyOnce = true;
         MyChoice = "";
         TextaAffiche.SetActive(false);
         AfficheText = false;
@@ -104,22 +111,32 @@ public class PlayerController : MonoBehaviour
         Once = false;
         Twice = false;
         InstantiateOnce = true;
+        RestartButton.SetActive(false);
         Clan = new string[3];
         Clan[0] = "Bleu";
         Clan[1] = "Vert";
         Clan[2] = "Rouge";
-        Debug.Log(PlayerPrefs.GetFloat("RespectRouge"));
-        Debug.Log(PlayerPrefs.GetFloat("RespectBleu"));
-        Debug.Log(PlayerPrefs.GetFloat("RespectVert"));
-        Debug.Log(PlayerPrefs.GetFloat("Gold"));
     }
 
     // Update is called once per frame
     void Update()
     {
-        gold.GetComponent<Text>().text = "Gold : " +PlayerPrefs.GetFloat("Gold").ToString();
+        gold.GetComponent<Text>().text = "Gold : " + PlayerPrefs.GetFloat("Gold").ToString();
         if (AfficheText)
         {
+            Princesse();
+            if (respectPrincesse == 0)
+            {
+                textAffiche.GetComponent<Text>().text = "Le Clan de la princesse vous déteste\nIl a donc décidé de la tuer\nVous avez perdu";
+            }
+            else if (respectPrincesse == 100)
+            {
+                textAffiche.GetComponent<Text>().text = "Vous avez le respect total du Clan de la princesse\nVous êtes victorieux félicitation!";
+            }
+            else
+            {
+                RestartButton.SetActive(true);
+            }
             TextaAffiche.SetActive(true);
         }
         if (MyChoice == "Tuer")
@@ -195,7 +212,7 @@ public class PlayerController : MonoBehaviour
             EssayerdePasser();
             AfficheCanvas = false;
         }
-        if (PersEnn != "Paysan" && (PlayerPrefs.GetFloat("Gold")>=10 || PersEnn=="Blessé"))
+        if (PersEnn != "Paysan" && (PlayerPrefs.GetFloat("Gold") >= 10 || PersEnn == "Blessé"))
         {
             if (inputY < 0)
             {
@@ -222,7 +239,7 @@ public class PlayerController : MonoBehaviour
         {
             Instantiate(Pellet, new Vector3(transform.position.x + 1, transform.position.y, 0), Quaternion.Euler(0, 0, 0));
             InstantiateOnce = false;
-            textAffiche.GetComponent<Text>().text = "Vous venez de tuer un joueur " + ClanEnn+"\nLa haine de son clan à votre égard augmente";
+            textAffiche.GetComponent<Text>().text = "Vous venez de tuer un joueur " + ClanEnn + "\nLa haine de son clan à votre égard augmente";
             if (PersEnn == "Soldat")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 5);
@@ -241,7 +258,7 @@ public class PlayerController : MonoBehaviour
             if (PersEnn == "Voleur")
             {
                 PlayerPrefs.SetFloat("Gold", PlayerPrefs.GetFloat("Gold") + 7);
-                Reputation(-8); 
+                Reputation(-8);
             }
         }
     }
@@ -281,7 +298,9 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            //GameOver
+            AfficheCanvas = false;
+            textAffiche.GetComponent<Text>().text = "Le Soldat ne vous a pas laissé passer\nVous êtes morts";
+            TextaAffiche.SetActive(true);
         }
     }
     private void Blesser()
@@ -344,16 +363,59 @@ public class PlayerController : MonoBehaviour
     }
     private void Reputation(float respect)
     {
-        for(int i=0; i<3; i++)
+        for (int i = 0; i < 3; i++)
         {
-            if (Clan[i]==ClanEnn)
+            if (Clan[i] == ClanEnn)
             {
-                PlayerPrefs.SetFloat("Respect" + Clan[i], PlayerPrefs.GetFloat("Respect"+ Clan[i]) + respect);
+                if (PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect <= 100 && PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect >= 0)
+                {
+                    PlayerPrefs.SetFloat("Respect" + Clan[i], PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect);
+                }
+                else if (PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect > 100)
+                {
+                    PlayerPrefs.SetFloat("Respect" + Clan[i], 100);
+                }
+                else if (PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect < 0)
+                {
+                    PlayerPrefs.SetFloat("Respect" + Clan[i], 0);
+                }
             }
             else
             {
-                PlayerPrefs.SetFloat("Respect" + Clan[i], PlayerPrefs.GetFloat("Respect"+ Clan[i]) + (respect/3));
+                if (PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect <= 100 && PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect >= 0)
+                {
+                    PlayerPrefs.SetFloat("Respect" + Clan[i], PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect / 3);
+                }
+                else if (PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect > 100)
+                {
+                    PlayerPrefs.SetFloat("Respect" + Clan[i], 100);
+                }
+                else if (PlayerPrefs.GetFloat("Respect" + Clan[i]) + respect < 0)
+                {
+                    PlayerPrefs.SetFloat("Respect" + Clan[i], 0);
+                }
             }
+        }
+    }
+    private void Princesse()
+    {
+        if (PlayerPrefs.GetFloat("Princesse") == 1)
+        {
+            Slider.GetComponent<RectTransform>().sizeDelta = new Vector2(PlayerPrefs.GetFloat("RespectRouge"), 30);
+            Slider.GetComponent<RectTransform>().position = new Vector2(SliderRef.GetComponent<RectTransform>().position.x - ((100 - PlayerPrefs.GetFloat("RespectRouge")) / 2), SliderRef.GetComponent<RectTransform>().position.y);
+            respectPrincesse = PlayerPrefs.GetFloat("RespectRouge");
+        }
+        if (PlayerPrefs.GetFloat("Princesse") == 2)
+        {
+            Slider.GetComponent<RectTransform>().sizeDelta = new Vector2(PlayerPrefs.GetFloat("RespectBleu"), 30);
+            Slider.GetComponent<RectTransform>().position = new Vector2(SliderRef.GetComponent<RectTransform>().position.x - ((100 - PlayerPrefs.GetFloat("RespectBleu")) / 2), SliderRef.GetComponent<RectTransform>().position.y);
+            respectPrincesse = PlayerPrefs.GetFloat("RespectBleu");
+        }
+        if (PlayerPrefs.GetFloat("Princesse") == 3)
+        {
+            Slider.GetComponent<RectTransform>().sizeDelta = new Vector2(PlayerPrefs.GetFloat("RespectVert"), 30);
+            Slider.GetComponent<RectTransform>().position = new Vector2(SliderRef.GetComponent<RectTransform>().position.x - ((100 - PlayerPrefs.GetFloat("RespectVert")) / 2), SliderRef.GetComponent<RectTransform>().position.y);
+            respectPrincesse = PlayerPrefs.GetFloat("RespectVert");
         }
     }
 }
